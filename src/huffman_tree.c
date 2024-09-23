@@ -35,7 +35,7 @@ huffman_node_t *hn_combine(huffman_node_t *v1, huffman_node_t *v2) {
 huffman_node_t *hn_create_tree(char_int_priority_queue_t *chq) {
   huffman_node_t *tmp1, *tmp2, *tmp3;
 
-  while (cihq_is_empty(chq)) {
+  while (!cihq_is_empty(chq)) {
     tmp1 = cihq_delete_min(chq);
     tmp2 = cihq_delete_min(chq);
     tmp3 = hn_combine(tmp1, tmp2);

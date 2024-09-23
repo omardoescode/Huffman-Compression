@@ -11,7 +11,8 @@ char_int_priority_queue_t *cihq_init() {
 bool cihq_is_empty(char_int_priority_queue_t *chq) { return chq->size == 0; }
 void cihq_bubble_down(char_int_priority_queue_t *chq, int hole) {
   int child;
-  huffman_node_t temp = chq->items[hole];
+  huffman_node_t *temp = hn_init('\0', 0, 0, 0);
+  hn_copy(temp, &chq->items[hole]);
 
   for (; hole * 2 <= chq->size; hole = child) {
     child = hole * 2;
@@ -20,17 +21,17 @@ void cihq_bubble_down(char_int_priority_queue_t *chq, int hole) {
         hn_compare(&chq->items[child + 1], &chq->items[child]) == 1)
       child++;
 
-    if (hn_compare(&chq->items[child + 1], &chq->items[child]) == 1) {
+    if (hn_compare(&chq->items[child + 1], temp) == 1) {
       hn_copy(&chq->items[hole], &chq->items[child]);
     } else
       break;
   }
 
-  hn_copy(&chq->items[hole], &temp);
+  hn_copy(&chq->items[hole], temp);
 }
 
 void cihq_insert(char_int_priority_queue_t *chq, huffman_node_t *value) {
-  unsigned int hole = ++chq->size;
+  size_t hole = ++chq->size;
   hn_copy(&chq->items[0], value);
 
   for (; hn_compare(value, &chq->items[hole / 2]) == 1; hole /= 2)
@@ -38,10 +39,14 @@ void cihq_insert(char_int_priority_queue_t *chq, huffman_node_t *value) {
 
   hn_copy(&chq->items[hole], &chq->items[0]);
 
-  debug_s("The new list: ");
+  debug_s("The new list:");
   for (int i = 1; i <= chq->size; i++) {
     debug_c(' ');
-    debug_c(chq->items[i].first);
+    debug_c('(');
+    debug_c(chq->items[i].element);
+    debug_c(':');
+    debug_u(chq->items[i].weight);
+    debug_c(')');
   }
   debug_c('\n');
 }
@@ -52,10 +57,11 @@ huffman_node_t *cihq_delete_min(char_int_priority_queue_t *chq) {
     exit(1);
   }
 
-  huffman_node_t *temp;
-  hn_copy(temp, &chq->items[1]);
-  hn_copy(&chq->items[1], &chq->items[chq->size--]);
+  huffman_node_t *max_item = hn_init('\0', 0, 0, 0);
+  hn_copy(max_item, &chq->items[1]);
+  hn_copy(&chq->items[1], &chq->items[chq->size]);
+  chq->size--;
   cihq_bubble_down(chq, 1);
 
-  return temp;
+  return max_item;
 }

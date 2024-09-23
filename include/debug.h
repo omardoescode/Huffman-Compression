@@ -1,3 +1,4 @@
+#define DEBUG 1
 #if defined(DEBUG) && (DEBUG == 1)
 #define debug_c(x) printf("%c", x)
 #define debug_s(x)                                                             \
