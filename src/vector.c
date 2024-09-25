@@ -1,14 +1,16 @@
 #include "../include/vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-static void v_increase_size(vector *v);
-static void validate_allocation(void *v, const char *context) {
+static void v_increase_size(vector *v, size_t new_capacity);
+void validate_allocation(void *v, const char *context) {
   if (!v) {
     printf("Memory allocation failed: %s", context);
     exit(1);
   }
 }
+size_t max(size_t v1, size_t v2) { return v1 > v2 ? v1 : v2; }
 
 struct vector {
   size_t capacity;
@@ -25,6 +27,7 @@ vector *v_init(size_t initial_capacity) {
       initial_capacity > MINIMUM_CAPACITY ? initial_capacity : MINIMUM_CAPACITY;
   v_type *values = malloc(capacity * sizeof(v_type));
   validate_allocation(values, "values initailized");
+  memset(values, 0, capacity * sizeof(v_type));
 
   vector *v = malloc(sizeof(vector));
   validate_allocation(v, "vector initialization");
@@ -62,17 +65,30 @@ void v_dispose(vector *v) {
 
 void v_append(vector *v, v_type val) {
   if (v->size == v->capacity) {
-    v_increase_size(v);
+    v_increase_size(v, 2 * v->capacity);
   }
 
   v->values[v->size++] = val;
 }
 
-void v_increase_size(vector *v) {
-  v->capacity *= 2;
+void v_increase_size(vector *v, size_t new_capacity) {
+  if (new_capacity < v->capacity)
+    return;
+
+  v->capacity = max(max(new_capacity, MINIMUM_CAPACITY), 2 * v->capacity);
 
   v_type *new_values = realloc(v->values, v->capacity * sizeof(v_type));
   validate_allocation(new_values, "copying values");
 
   v->values = new_values;
+}
+
+void v_set(vector *v, size_t index, v_type val) {
+  // This will either create a space for index if not there or do nothing if it
+  // exists
+  v_increase_size(v, index + 1);
+
+  v->values[index] = val;
+  if (index >= v->size)
+    v->size = index + 1;
 }

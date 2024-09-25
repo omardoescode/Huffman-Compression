@@ -1,7 +1,7 @@
 #ifndef VECTOR_HEADER
 #define VECTOR_HEADER
 #define MINIMUM_CAPACITY 10
-#define v_type uint32_t
+#define v_type size_t
 #include <stdint.h>
 #include <wchar.h>
 
@@ -14,5 +14,6 @@ v_type *v_arr(vector *v);
 void v_copy(vector **dest, const vector *src);
 v_type *v_get(const vector *v, size_t index);
 void v_append(vector *v, v_type val);
+void v_set(vector *v, size_t index, v_type val);
 void v_dispose(vector *v);
 #endif

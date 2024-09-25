@@ -2,14 +2,13 @@
 #include "../include/debug.h"
 #include "../include/huffman_tree.h"
 
-char_int_priority_queue_t *cihq_init() {
-  char_int_priority_queue_t *i =
-      (char_int_priority_queue_t *)malloc(sizeof(char_int_priority_queue_t));
+priority_queue_t *cihq_init() {
+  priority_queue_t *i = (priority_queue_t *)malloc(sizeof(priority_queue_t));
   i->size = 0;
   return i;
 }
-bool cihq_is_empty(char_int_priority_queue_t *chq) { return chq->size == 0; }
-void cihq_bubble_down(char_int_priority_queue_t *chq, int hole) {
+bool cihq_is_empty(priority_queue_t *chq) { return chq->size == 0; }
+void cihq_bubble_down(priority_queue_t *chq, int hole) {
   int child;
   huffman_node_t *temp = hn_init('\0', 0, 0, 0);
   hn_copy(temp, &chq->items[hole]);
@@ -30,7 +29,7 @@ void cihq_bubble_down(char_int_priority_queue_t *chq, int hole) {
   hn_copy(&chq->items[hole], temp);
 }
 
-void cihq_insert(char_int_priority_queue_t *chq, huffman_node_t *value) {
+void cihq_insert(priority_queue_t *chq, huffman_node_t *value) {
   size_t hole = ++chq->size;
   hn_copy(&chq->items[0], value);
 
@@ -39,6 +38,7 @@ void cihq_insert(char_int_priority_queue_t *chq, huffman_node_t *value) {
 
   hn_copy(&chq->items[hole], &chq->items[0]);
 
+#if 0
   debug_s("The new list:");
   for (int i = 1; i <= chq->size; i++) {
     debug_c(' ');
@@ -49,9 +49,10 @@ void cihq_insert(char_int_priority_queue_t *chq, huffman_node_t *value) {
     debug_c(')');
   }
   debug_c('\n');
+#endif
 }
 
-huffman_node_t *cihq_delete_min(char_int_priority_queue_t *chq) {
+huffman_node_t *cihq_delete_min(priority_queue_t *chq) {
   if (cihq_is_empty(chq)) {
     puts("Invalid operation: Priortity queue is empty");
     exit(1);

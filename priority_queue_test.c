@@ -3,7 +3,7 @@
 #include <assert.h>
 
 int main(void) {
-  char_int_priority_queue_t *queue = cihq_init();
+  priority_queue_t *queue = cihq_init();
 
   assert(cihq_is_empty(queue));
 
