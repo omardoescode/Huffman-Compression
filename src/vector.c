@@ -43,6 +43,7 @@ v_type *v_get(const vector *v, size_t index) {
     return NULL;
   }
 
+  /* printf("Inserting at index: %lc: ", index); */
   return &v->values[index];
 }
 
@@ -57,6 +58,8 @@ void v_copy(vector **dest, const vector *src) {
 
 void v_dispose(vector *v) {
   if (!v)
+    return;
+  if (!v->values)
     return;
 
   free(v->values);
@@ -77,8 +80,12 @@ void v_increase_size(vector *v, size_t new_capacity) {
 
   v->capacity = max(max(new_capacity, MINIMUM_CAPACITY), 2 * v->capacity);
 
-  v_type *new_values = realloc(v->values, v->capacity * sizeof(v_type));
+  v_type *new_values = malloc(v->capacity * sizeof(v_type));
   validate_allocation(new_values, "copying values");
+
+  for (int i = 0; i < v->size; i++)
+    new_values[i] = v->values[i];
+  memset(new_values + v->size, 0, (v->capacity - v->size) * sizeof(v_type));
 
   v->values = new_values;
 }

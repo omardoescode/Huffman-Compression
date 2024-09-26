@@ -1,7 +1,6 @@
+#include "include/debug.h"
 #include "include/huffman_tree.h"
 #include "include/priority_queue.h"
-
-#include "include/debug.h"
 #include "include/vector.h"
 #include <assert.h>
 #include <limits.h>
@@ -10,8 +9,11 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+#define HEADER_END "\0"
 FILE *open_file(char *filename, char *mode);
-void compress(FILE *fp);
+void compress(FILE *, FILE *);
+void write_header(vector *, FILE *);
+void write_file(FILE *, FILE *, vector *);
 
 FILE *open_file(char *filename, char *mode) {
   FILE *fp = fopen(filename, mode);
@@ -24,16 +26,17 @@ FILE *open_file(char *filename, char *mode) {
   return fp;
 }
 
-void compress(FILE *fp) {
+// TODO: Fix when the input file is empty
+// It results in an error
+void compress(FILE *inp, FILE *out) {
   vector *freq = v_init(0);
   vector *codes = v_init(0);
 
   priority_queue_t *queue = cihq_init();
+  assert(queue);
 
   wchar_t c;
-  while (WEOF != (c = getwc(fp))) {
-    /* printf("Read character: %lc, current size: %zu\n", c, */
-    /*        v_size(freq)); // Debugging print */
+  while (WEOF != (c = getwc(inp))) {
     assert(c >= 0); // Ensure we are not missing around
     v_type *v;
     if ((v = v_get(freq, c))) {
@@ -42,15 +45,11 @@ void compress(FILE *fp) {
       v_set(freq, c, 1);
     }
   }
-
-  /* for (int i = 0; i < v_size(freq); i++) { */
-  /*   v_type val = *v_get(freq, i); */
-  /*   if (val) */
-  /*     printf("%lc: %u\n", i, val); */
-  /* } */
+  // Make sure '\0' is not used
+  assert(*v_get(freq, '\0') == 0);
 
   // Plug data into priority queue
-  for (int i = 0; i < v_size(freq); i++) {
+  for (size_t i = 0; i < v_size(freq); i++) {
     v_type val = *v_get(freq, i);
     if (!val)
       continue;
@@ -59,31 +58,47 @@ void compress(FILE *fp) {
   }
 
   huffman_node_t *tree = hn_create_tree(queue);
-  /* hn_print(tree); */
 
   hn_assign_codes(tree, codes);
 
-  for (int i = 0; i < v_size(codes); i++) {
+  write_header(codes, out);
+
+  rewind(inp);
+  write_file(inp, out, codes);
+
+  v_dispose(freq);
+  v_dispose(codes);
+}
+
+void write_header(vector *codes, FILE *out) {
+  fprintf(out, "%zu\n", v_size(codes) - 1);
+  for (size_t i = 0; i < v_size(codes); i++) {
     v_type val = *v_get(codes, i);
-    if (!val)
-      continue;
-    printf("%c: %#zX\n", i, val);
+    if (val)
+      fprintf(out, "%zu %#zX\n", i, val);
   }
-#if 0
-#endif
+}
+
+void write_file(FILE *inp, FILE *out, vector *codes) {
+  wchar_t c;
+  while (WEOF != (c = getwc(inp))) {
+    fprintf(out, "%#zX ", *v_get(codes, c));
+  }
 }
 
 int main(int argc, char *argv[argc]) {
   setlocale(LC_ALL, "");
-  if (argc < 2) {
-    puts("No File is given to this command");
+  assert(sizeof(wchar_t) <=
+         sizeof(size_t)); // Without this assertion, the program will crash
+  if (argc < 3) {
+    puts("Invalid Input; Usage: compress INPUT_FILE OUTPUT_FILE");
     return 1;
   }
 
-  for (int i = 1; i < argc; i++) {
-    FILE *fp = open_file(argv[i], "r, ccs=UTF-8");
-    compress(fp);
-    fclose(fp);
-  }
+  FILE *inp = open_file(argv[1], "r, ccs=UTF-8");
+  FILE *out = open_file(argv[2], "w, ccs=UTF-8");
+  compress(inp, out);
+  fclose(inp);
+  fclose(out);
   return EXIT_SUCCESS;
 }

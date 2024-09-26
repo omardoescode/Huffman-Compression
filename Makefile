@@ -1,4 +1,4 @@
-main: main.o priority_queue.o huffman_tree.o vector.o
+all: main.o priority_queue.o huffman_tree.o vector.o
 	cc main.o priority_queue.o huffman_tree.o vector.o -o compress 
 
 main.o: main.c

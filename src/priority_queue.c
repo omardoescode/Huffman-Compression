@@ -7,6 +7,7 @@ priority_queue_t *cihq_init() {
   i->size = 0;
   return i;
 }
+
 bool cihq_is_empty(priority_queue_t *chq) { return chq->size == 0; }
 void cihq_bubble_down(priority_queue_t *chq, int hole) {
   int child;
@@ -17,10 +18,10 @@ void cihq_bubble_down(priority_queue_t *chq, int hole) {
     child = hole * 2;
 
     if (child != chq->size &&
-        hn_compare(&chq->items[child + 1], &chq->items[child]) == 1)
+        hn_compare(&chq->items[child + 1], &chq->items[child]) == -1)
       child++;
 
-    if (hn_compare(&chq->items[child + 1], temp) == 1) {
+    if (hn_compare(&chq->items[child + 1], temp) == -1) {
       hn_copy(&chq->items[hole], &chq->items[child]);
     } else
       break;
@@ -33,7 +34,7 @@ void cihq_insert(priority_queue_t *chq, huffman_node_t *value) {
   size_t hole = ++chq->size;
   hn_copy(&chq->items[0], value);
 
-  for (; hn_compare(value, &chq->items[hole / 2]) == 1; hole /= 2)
+  for (; hn_compare(value, &chq->items[hole / 2]) == -1; hole /= 2)
     hn_copy(&chq->items[hole], &chq->items[hole / 2]);
 
   hn_copy(&chq->items[hole], &chq->items[0]);
