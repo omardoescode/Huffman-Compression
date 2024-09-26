@@ -1,3 +1,4 @@
+#include "include/bit_packer.h"
 #include "include/debug.h"
 #include "include/huffman_tree.h"
 #include "include/priority_queue.h"
@@ -5,6 +6,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <locale.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -71,19 +73,37 @@ void compress(FILE *inp, FILE *out) {
 }
 
 void write_header(vector *codes, FILE *out) {
-  fprintf(out, "%zu\n", v_size(codes) - 1);
+  bit_packer *bp = bp_init(out);
+
+  size_t length = 0;
+  for (int i = 0; i < v_size(codes); i++) {
+    if (*v_get(codes, i))
+      length++;
+  }
+
+  bp_pack(bp, length);
+
   for (size_t i = 0; i < v_size(codes); i++) {
     v_type val = *v_get(codes, i);
     if (val)
-      fprintf(out, "%zu %#zX\n", i, val);
+      bp_pack(bp, val);
   }
+  putc('\n', out);
+
+  bp_flush(bp);
+  bp_dispose(bp);
 }
 
 void write_file(FILE *inp, FILE *out, vector *codes) {
   wchar_t c;
+
+  bit_packer *bp = bp_init(out);
   while (WEOF != (c = getwc(inp))) {
-    fprintf(out, "%#zX ", *v_get(codes, c));
+    bp_pack(bp, *v_get(codes, c));
   }
+
+  bp_flush(bp);
+  bp_dispose(bp);
 }
 
 int main(int argc, char *argv[argc]) {
