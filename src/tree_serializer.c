@@ -7,13 +7,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 
-void to_binary(const size_t x, const char bits, char i) {
-  if (i == bits)
-    return;
-  to_binary(x / 2, bits, i + 1);
-  printf("%zu", x % 2);
-}
-
 size_t count_bytes(size_t value, int size) {
   int res = 0;
   for (int i = 0; i < size; i++) {
@@ -34,15 +27,11 @@ struct tree_serializer {
 };
 
 void ts_write_bit(tree_serializer *ts, int bit) {
-  printf("-- Adding bit %d\n", bit);
   ts->buffer <<= 1;
   ts->buffer += bit;
   ts->bit_count++;
 
   if (ts->bit_count == 8) {
-    printf("-- Buffer full: ");
-    to_binary(ts->buffer, sizeof(ts->buffer) * 8, 0);
-    putc('\n', stdout);
     if (fwrite(&ts->buffer, 1, sizeof(ts->buffer), ts->fp) != 1) {
       puts("Could't write");
       exit(1);
@@ -59,9 +48,6 @@ void ts_write_multiple_bits(tree_serializer *ts, int bits, int count) {
 }
 
 void ts_write_flush(tree_serializer *ts) {
-  printf("-- Flushing: ");
-  to_binary(ts->buffer, sizeof(ts->buffer) * 8, 0);
-  putc('\n', stdout);
 
   if (ts->bit_count) {
     ts->buffer <<= (8 - ts->bit_count);
@@ -93,13 +79,7 @@ void ts_serialize_aux(tree_serializer *ts, huffman_node_t *tree) {
   }
 
   if (hn_is_leaf(tree)) {
-    printf("tree-serialize 1");
-
     char count = count_bytes(tree->element, sizeof(tree->element));
-
-    to_binary(count, 2, 0);
-    to_binary(tree->element, (count + 1) * 8, 0);
-    printf("(%lc)(%d) in %d bytes\n", tree->element, tree->element, count + 1);
 
     ts_write_bit(ts, 1);
     ts_write_multiple_bits(ts, count, ts->element_length);
@@ -108,7 +88,6 @@ void ts_serialize_aux(tree_serializer *ts, huffman_node_t *tree) {
     return;
   }
 
-  printf("Writing an internal node 0\n");
   ts_write_bit(ts, 0);
   ts_serialize_aux(ts, tree->left);
   ts_serialize_aux(ts, tree->right);
@@ -124,16 +103,12 @@ int ts_read_bit(tree_serializer *ts) {
     if (fread(&ts->buffer, 1, sizeof(ts->buffer), ts->fp) != 1) {
       return -1;
     }
-    printf("-- Buffer read: ");
-    to_binary(ts->buffer, sizeof(ts->buffer) * 8, 0);
-    putc('\n', stdout);
     ts->bit_count = 0;
   }
 
   int bit = (ts->buffer >> (7 - ts->bit_count)) & 1;
   ts->bit_count++;
 
-  printf("-- Reading bit: %d\n", bit);
   return bit;
 }
 void ts_read_multiple_bits(tree_serializer *ts, size_t bits, void *c) {
@@ -151,28 +126,20 @@ huffman_node_t *ts_deserialize_aux(tree_serializer *ts) {
   int bit = ts_read_bit(ts);
 
   if (bit == 0) {
-    printf("Reading an internal node\n");
     // Is an internal node
     huffman_node_t *hn = malloc(sizeof(huffman_node_t));
     hn->element = '\0';
     hn->weight = 0;
     hn->left = ts_deserialize_aux(ts);
     hn->right = ts_deserialize_aux(ts);
-    printf("Done");
     return hn;
   }
-  printf("Reading an leaf\n");
   // Is a leaf
   char count;
   ts_read_multiple_bits(ts, ts->element_length, &count);
 
   wchar_t c;
   ts_read_multiple_bits(ts, (count + 1) * 8, &c);
-
-  printf("** Reading an element: ");
-  to_binary(c, (count + 1) * 8, 0);
-  if (printf(" (%d) with %d bytes\n", c, count + 1)) {
-  }
 
   huffman_node_t *hn = malloc(sizeof(huffman_node_t));
   hn->element = c;
