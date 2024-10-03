@@ -1,4 +1,5 @@
 #include "../include/interpose.h"
+#include "../include/debug.h"
 
 void binary(const size_t x, char i) {
   if (i == 8)
@@ -23,10 +24,11 @@ size_t my_fread(void *__restrict __ptr, size_t __size, size_t __n,
 
   size_t res = original_fread(__ptr, __size, __n, __stream);
 
+#if DEBUG
   printf("-- Reading ");
   binary(*((size_t *)__ptr), 0);
   printf(" with size %zu to file\n", __size);
-
+#endif
   // Call the original fread function
   return res;
 }
@@ -39,10 +41,12 @@ size_t my_fwrite(const void *__restrict __ptr, size_t __size, size_t __n,
         RTLD_NEXT, "fwrite");
   }
 
+#if DEBUG
   // Log the action
   printf("-- Writing ");
   binary(*((size_t *)__ptr), 0);
   printf(" with size %zu to file\n", __size);
+#endif
 
   // Call the original fwrite function
   return original_fwrite(__ptr, __size, __n, __s);
