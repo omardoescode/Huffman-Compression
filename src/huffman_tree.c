@@ -10,6 +10,7 @@ struct huffman_node_t {
   huffman_node_t *left;
   huffman_node_t *right;
 };
+
 huffman_node_t *hn_init(wchar_t el, size_t wt, huffman_node_t *l,
                         huffman_node_t *r) {
   huffman_node_t *hn = (huffman_node_t *)malloc(sizeof(huffman_node_t));
