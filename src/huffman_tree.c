@@ -58,12 +58,12 @@ huffman_node_t *hn_combine(huffman_node_t *v1, huffman_node_t *v2) {
 huffman_node_t *hn_create_tree(priority_queue_t *chq) {
   huffman_node_t *tmp1, *tmp2, *tmp3;
 
-  while (cihq_size(chq) > 1) {
-    tmp1 = cihq_delete_min(chq);
-    tmp2 = cihq_delete_min(chq);
+  while (pq_size(chq) > 1) {
+    tmp1 = pq_delete_min(chq);
+    tmp2 = pq_delete_min(chq);
     tmp3 = hn_combine(tmp1, tmp2);
 
-    cihq_insert(chq, tmp3);
+    pq_insert(chq, tmp3);
   }
   return tmp3;
 }

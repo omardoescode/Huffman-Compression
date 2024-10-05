@@ -45,7 +45,7 @@ void compress(FILE *inp, FILE *out) {
   vector *freq = v_init(0);
   vector *codes = v_init(0);
 
-  priority_queue_t *queue = cihq_init();
+  priority_queue_t *queue = pq_init();
   assert(queue);
 
   wchar_t c;
@@ -65,7 +65,7 @@ void compress(FILE *inp, FILE *out) {
   for (size_t i = 0; i < v_size(freq); i++) {
     v_type val = *v_get(freq, i);
     if (val)
-      cihq_insert(queue, hn_init(i, val, 0, 0));
+      pq_insert(queue, hn_init(i, val, 0, 0));
   }
 
   huffman_node_t *tree = hn_create_tree(queue);
@@ -79,7 +79,7 @@ void compress(FILE *inp, FILE *out) {
 
   v_free(freq);
   v_free(codes);
-  cihq_free(queue);
+  pq_free(queue);
   hn_free(tree);
 }
 
