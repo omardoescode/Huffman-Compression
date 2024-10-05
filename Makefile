@@ -17,4 +17,4 @@ docs: Doxyfile
 	doxygen Doxyfile
 
 clean:
-	rm -f *.o huff 
+	rm -f *.o
