@@ -49,22 +49,18 @@ huffman_node_t *hn_create_tree(priority_queue_t *chq) {
   return tmp3;
 }
 
-void hn_print(const huffman_node_t *hn, size_t space) {
+void hn_print(const huffman_node_t *hn) {
   if (!hn) {
-    puts("UP");
     return;
   }
 
   if (hn_is_leaf(hn)) {
-    printf("%lc(%u): %zu\n", (wchar_t)hn->element, hn->element, hn->weight);
+    printf("%lc (%u): %zu\n", (wchar_t)hn->element, hn->element, hn->weight);
     return;
   }
 
-  puts("Going left");
-  hn_print(hn->left, space + 1);
-  puts("UP, then Going right");
-  hn_print(hn->right, space + 1);
-  puts("UP");
+  hn_print(hn->left);
+  hn_print(hn->right);
 }
 
 // TODO: Fix this bug
@@ -88,5 +84,13 @@ static void hn_assign_codes_aux(huffman_node_t *hn, vector *codes,
 }
 
 void hn_assign_codes(huffman_node_t *hn, vector *codes) {
-  hn_assign_codes_aux(hn, codes, 0);
+  hn_assign_codes_aux(hn, codes, 1);
+}
+
+void hn_free(huffman_node_t *hn) {
+  if (!hn)
+    return;
+  hn_free(hn->left);
+  hn_free(hn->right);
+  free(hn);
 }
