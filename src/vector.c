@@ -48,7 +48,7 @@ v_type *v_get(const vector *v, size_t index) {
 }
 
 void v_copy(vector **dest, const vector *src) {
-  v_dispose(*dest);
+  v_free(*dest);
   *dest = v_init(src->capacity);
 
   for (size_t i = 0; i < src->size; i++) {
@@ -56,7 +56,7 @@ void v_copy(vector **dest, const vector *src) {
   }
 }
 
-void v_dispose(vector *v) {
+void v_free(vector *v) {
   if (!v)
     return;
   if (!v->values)

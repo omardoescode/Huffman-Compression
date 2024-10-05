@@ -15,5 +15,5 @@ void v_copy(vector **dest, const vector *src);
 v_type *v_get(const vector *v, size_t index);
 void v_append(vector *v, v_type val);
 void v_set(vector *v, size_t index, v_type val);
-void v_dispose(vector *v);
+void v_free(vector *v);
 #endif
