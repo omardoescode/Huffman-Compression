@@ -74,7 +74,6 @@ void compress(FILE *inp, FILE *out) {
   }
 
   huffman_node_t *tree = hn_create_tree(queue);
-  hn_print(tree);
   hn_assign_codes(tree, codes);
 
   write_header(tree, out);
@@ -113,7 +112,6 @@ void uncompress(FILE *inp, FILE *out) {
   tree_deserializer *ts = ts_init(inp, NULL, count);
 
   huffman_node_t *tree = ts_deserialize(ts);
-  hn_print(tree);
 
   bit_unpacker *bu = bu_init(tree, inp);
   bu_unpack(bu, out);
