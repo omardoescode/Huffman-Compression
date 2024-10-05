@@ -3,6 +3,11 @@
 #include "../include/huffman_tree.h"
 #include <limits.h>
 
+struct priority_queue_t {
+  huffman_node_t *items;
+  size_t size;
+};
+
 priority_queue_t *cihq_init() {
   priority_queue_t *i = (priority_queue_t *)malloc(sizeof(priority_queue_t));
   i->items = hn_init_array(CHAR_MAX);
@@ -11,6 +16,9 @@ priority_queue_t *cihq_init() {
 }
 
 bool cihq_is_empty(priority_queue_t *chq) { return chq->size == 0; }
+
+size_t cihq_size(priority_queue_t *chq) { return chq->size; }
+
 void cihq_bubble_down(priority_queue_t *chq, int hole) {
   int child;
   huffman_node_t *temp = hn_init('\0', 0, 0, 0);

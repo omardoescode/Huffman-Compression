@@ -58,7 +58,7 @@ huffman_node_t *hn_combine(huffman_node_t *v1, huffman_node_t *v2) {
 huffman_node_t *hn_create_tree(priority_queue_t *chq) {
   huffman_node_t *tmp1, *tmp2, *tmp3;
 
-  while (chq->size > 1) {
+  while (cihq_size(chq) > 1) {
     tmp1 = cihq_delete_min(chq);
     tmp2 = cihq_delete_min(chq);
     tmp3 = hn_combine(tmp1, tmp2);
@@ -82,9 +82,6 @@ void hn_print(const huffman_node_t *hn) {
   hn_print(hn->right);
 }
 
-// TODO: Fix this bug
-// It keeps resulting in wrong values for codes
-// This sucks bro lol
 static void hn_assign_codes_aux(huffman_node_t *hn, vector *codes,
                                 unsigned rsf) {
   if (!hn) {

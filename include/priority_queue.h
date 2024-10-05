@@ -8,12 +8,10 @@
 #include <stdlib.h>
 
 typedef struct priority_queue_t priority_queue_t;
-struct priority_queue_t {
-  huffman_node_t *items;
-  unsigned int size;
-};
+struct priority_queue_t;
 
 priority_queue_t *cihq_init();
+size_t cihq_size(priority_queue_t *);
 bool cihq_is_empty(priority_queue_t *chq);
 void cihq_bubble_down(priority_queue_t *chq, int hole);
 void cihq_insert(priority_queue_t *chq, huffman_node_t *value);
