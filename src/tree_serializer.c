@@ -141,8 +141,7 @@ huffman_node_t *ts_deserialize_aux(tree_serializer *ts) {
 
 huffman_node_t *ts_deserialize(tree_serializer *ts) {
   ts->bit_count = 8; // Just to initialize reading first
-  huffman_node_t *t = ts_deserialize_aux(ts);
-  return t;
+  return ts_deserialize_aux(ts);
 }
 
 void ts_free(tree_serializer *ts) { free(ts); }
