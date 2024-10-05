@@ -20,7 +20,6 @@ struct vector {
 
 const size_t v_capacity(const vector *v) { return v->capacity; }
 const size_t v_size(const vector *v) { return v->size; }
-v_type *v_arr(vector *v) { return v->values; }
 
 vector *v_init(size_t initial_capacity) {
   size_t capacity =
@@ -43,8 +42,7 @@ v_type *v_get(const vector *v, size_t index) {
     return NULL;
   }
 
-  /* printf("Inserting at index: %lc: ", index); */
-  return &v->values[index];
+  return v->values + index;
 }
 
 void v_copy(vector **dest, const vector *src) {
