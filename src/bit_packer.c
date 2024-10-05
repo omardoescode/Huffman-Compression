@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 struct bit_packer {
-  uint8_t buffer;
+  char buffer;
   unsigned int bit_pos;
   FILE *fp;
 };
@@ -23,8 +23,8 @@ bit_packer *bp_init(FILE *fp) {
 }
 
 void bp_pack(bit_packer *bp, size_t val) {
-  int length = get_bit_length(val);
-
+  int length = get_bit_length(val) - 1;
+  val &= (1UL << length) - 1;
   int bits_to_pack;
   for (; length; length -= bits_to_pack) {
     int available_bits = 8 - bp->bit_pos;
@@ -39,7 +39,7 @@ void bp_pack(bit_packer *bp, size_t val) {
     bp->bit_pos += bits_to_pack;
 
     if (bp->bit_pos == 8) {
-      fwrite(&bp->buffer, 1, 1, bp->fp);
+      fwrite(&bp->buffer, sizeof(bp->buffer), 1, bp->fp);
       bp->buffer = bp->bit_pos = 0;
     }
   }
@@ -47,8 +47,11 @@ void bp_pack(bit_packer *bp, size_t val) {
 
 void bp_flush(bit_packer *bp) {
   if (bp->bit_pos) {
-    fwrite(&bp->buffer, 1, 1, bp->fp);
+    bp->buffer <<= (7 - bp->bit_pos);
+    fwrite(&bp->buffer, sizeof(bp->buffer), 1, bp->fp);
   }
+  bp->bit_pos = 0;
+  bp->buffer = 0;
 }
 
-void bp_dispose(bit_packer *bp) { free(bp); }
+void bp_free(bit_packer *bp) { free(bp); }
