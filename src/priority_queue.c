@@ -38,19 +38,6 @@ void cihq_insert(priority_queue_t *chq, huffman_node_t *value) {
     hn_copy(&chq->items[hole], &chq->items[hole / 2]);
 
   hn_copy(&chq->items[hole], &chq->items[0]);
-
-#if 0
-  debug_s("The new list:");
-  for (int i = 1; i <= chq->size; i++) {
-    debug_c(' ');
-    debug_c('(');
-    debug_c(chq->items[i].element);
-    debug_c(':');
-    debug_u(chq->items[i].weight);
-    debug_c(')');
-  }
-  debug_c('\n');
-#endif
 }
 
 huffman_node_t *cihq_delete_min(priority_queue_t *chq) {
@@ -67,3 +54,5 @@ huffman_node_t *cihq_delete_min(priority_queue_t *chq) {
 
   return max_item;
 }
+
+void cihq_free(priority_queue_t *chq) { free(chq); }
