@@ -25,11 +25,13 @@ size_t my_fread(void *__restrict __ptr, size_t __size, size_t __n,
   size_t res = original_fread(__ptr, __size, __n, __stream);
 
 #if DEBUG
-  printf("-- Reading ");
-  binary(*((size_t *)__ptr), 0);
-  printf(" with size %zu to file\n", __size);
+  if (res != 0) {
+    printf("-- fread(");
+    binary(*((size_t *)__ptr), 0);
+    printf(", %zu, %zu, <file>);\n", __size, __n);
+  }
 #endif
-  // Call the original fread function
+
   return res;
 }
 
@@ -41,13 +43,16 @@ size_t my_fwrite(const void *__restrict __ptr, size_t __size, size_t __n,
         RTLD_NEXT, "fwrite");
   }
 
+  int res = original_fwrite(__ptr, __size, __n, __s);
+
 #if DEBUG
-  // Log the action
-  printf("-- Writing ");
-  binary(*((size_t *)__ptr), 0);
-  printf(" with size %zu to file\n", __size);
+  // Print if res is not zero
+  if (res != 0) {
+    printf("-- fwrite(");
+    binary(*((size_t *)__ptr), 0);
+    printf(", %zu, %zu, <file>);\n", __size, __n);
+  }
 #endif
 
-  // Call the original fwrite function
-  return original_fwrite(__ptr, __size, __n, __s);
+  return res;
 }
