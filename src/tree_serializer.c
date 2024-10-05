@@ -60,20 +60,19 @@ void ts_write_flush(tree_serializer *ts) {
   }
 }
 
-tree_serializer *ts_init(FILE *fp, huffman_node_t *tree) {
+tree_serializer *ts_init(FILE *fp, huffman_node_t *tree, char count) {
   tree_serializer *ts = (tree_serializer *)malloc(sizeof(tree_serializer));
   ts->buffer = 0;
   ts->bit_count = 0;
   ts->fp = fp;
   ts->tree = tree;
-  ts->element_length = log2(sizeof(ts->tree->element));
+  ts->element_length = count;
 
   return ts;
 }
 
 void ts_serialize_aux(tree_serializer *ts, huffman_node_t *tree) {
   if (!tree) {
-    puts("Wrote NULL");
     ts_write_bit(ts, 1);
     return;
   }
@@ -149,9 +148,8 @@ huffman_node_t *ts_deserialize_aux(tree_serializer *ts) {
 }
 huffman_node_t *ts_deserialize(tree_serializer *ts) {
   ts->bit_count = 8; // Just to initialize reading first
-  huffman_node_t *tree = ts_deserialize_aux(ts);
-  puts("Finished...");
-  return tree;
+  huffman_node_t *t = ts_deserialize_aux(ts);
+  return t;
 }
 
-void ts_dispose(tree_serializer *ts) { free(ts); }
+void ts_free(tree_serializer *ts) { free(ts); }

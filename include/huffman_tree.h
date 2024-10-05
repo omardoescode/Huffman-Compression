@@ -28,5 +28,6 @@ int hn_compare(const huffman_node_t *v1, const huffman_node_t *v2);
 huffman_node_t *hn_combine(huffman_node_t *v1, huffman_node_t *v2);
 huffman_node_t *hn_create_tree(priority_queue_t *chq);
 void hn_assign_codes(huffman_node_t *hn, vector *codes);
-void hn_print(const huffman_node_t *hn, size_t spaces);
+void hn_print(const huffman_node_t *hn);
+void hn_free(huffman_node_t *hn);
 #endif
