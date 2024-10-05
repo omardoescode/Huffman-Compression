@@ -1,7 +1,6 @@
 #include "../include/tree_serializer.h"
 #include "../include/huffman_tree.h"
 #include <assert.h>
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,18 +77,18 @@ void ts_serialize_aux(tree_serializer *ts, huffman_node_t *tree) {
   }
 
   if (hn_is_leaf(tree)) {
-    char count = count_bytes(tree->element, sizeof(tree->element));
+    char count = count_bytes(hn_element(tree), sizeof(hn_element(tree)));
 
     ts_write_bit(ts, 1);
     ts_write_multiple_bits(ts, count, ts->element_length);
 
-    ts_write_multiple_bits(ts, tree->element, (count + 1) * 8);
+    ts_write_multiple_bits(ts, hn_element(tree), (count + 1) * 8);
     return;
   }
 
   ts_write_bit(ts, 0);
-  ts_serialize_aux(ts, tree->left);
-  ts_serialize_aux(ts, tree->right);
+  ts_serialize_aux(ts, hn_left(tree));
+  ts_serialize_aux(ts, hn_right(tree));
 }
 
 void ts_serialize(tree_serializer *ts) {
@@ -126,12 +125,9 @@ huffman_node_t *ts_deserialize_aux(tree_serializer *ts) {
 
   if (bit == 0) {
     // Is an internal node
-    huffman_node_t *hn = malloc(sizeof(huffman_node_t));
-    hn->element = '\0';
-    hn->weight = 0;
-    hn->left = ts_deserialize_aux(ts);
-    hn->right = ts_deserialize_aux(ts);
-    return hn;
+    huffman_node_t *left = ts_deserialize_aux(ts);
+    huffman_node_t *right = ts_deserialize_aux(ts);
+    return hn_init('\0', 0, left, right);
   }
   // Is a leaf
   char count;
@@ -140,12 +136,9 @@ huffman_node_t *ts_deserialize_aux(tree_serializer *ts) {
   wchar_t c;
   ts_read_multiple_bits(ts, (count + 1) * 8, &c);
 
-  huffman_node_t *hn = malloc(sizeof(huffman_node_t));
-  hn->element = c;
-  hn->weight = 0;
-  hn->left = hn->right = NULL;
-  return hn;
+  return hn_init(c, 0, NULL, NULL);
 }
+
 huffman_node_t *ts_deserialize(tree_serializer *ts) {
   ts->bit_count = 8; // Just to initialize reading first
   huffman_node_t *t = ts_deserialize_aux(ts);

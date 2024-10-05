@@ -42,12 +42,13 @@ void bu_unpack(bit_unpacker *bu, FILE *out) {
       return;
 
     if (bit == 0) {
-      bu->temp = bu->temp->left;
+      bu->temp = hn_left(bu->temp);
     } else if (bit == 1) {
-      bu->temp = bu->temp->right;
+      bu->temp = hn_right(bu->temp);
     }
 
     if (hn_is_leaf(bu->temp)) {
+      fprintf(out, "%lc", hn_element(bu->temp));
       bu->temp = bu->tree;
     }
   }

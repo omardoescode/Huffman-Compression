@@ -35,12 +35,7 @@ FILE *open_file(char *filename, char *mode) {
 }
 
 void write_header(huffman_node_t *tree, FILE *fp) {
-  char *header = HEADER;
-  char count = (char)log2(sizeof(wchar_t));
-  fwrite(header, strlen(header), 1, fp);
-  fwrite(&count, sizeof(count), 1, fp);
-
-  tree_serializer *ts = ts_init(fp, tree, count);
+  tree_serializer *ts = ts_init(fp, tree, log2(sizeof(wchar_t)));
   ts_serialize(ts);
   ts_free(ts);
 }
@@ -74,6 +69,7 @@ void compress(FILE *inp, FILE *out) {
   }
 
   huffman_node_t *tree = hn_create_tree(queue);
+  hn_print(tree);
   hn_assign_codes(tree, codes);
 
   write_header(tree, out);
@@ -102,13 +98,17 @@ void write_file(FILE *inp, FILE *out, vector *codes) {
 }
 
 void uncompress(FILE *inp, FILE *out) {
-  char *header = malloc(strlen(HEADER) + 1);
-  char count;
-  fread(header, strlen(HEADER), 1, inp);
-  fread(&count, sizeof(count), 1, inp);
-  tree_deserializer *ts = ts_init(inp, NULL, count);
+  /* char *header = malloc(strlen(HEADER) + 1); */
+  /* char count; */
+  /* fread(header, strlen(HEADER), 1, inp); */
+  /* fread(&count, sizeof(count), 1, inp); */
+  /**/
+  /* header[strlen(HEADER)] = '\0'; */
+  /* assert(strcmp(header, HEADER) == 0); */
+  tree_deserializer *ts = ts_init(inp, NULL, log2(sizeof(wchar_t)));
 
   huffman_node_t *tree = ts_deserialize(ts);
+  hn_print(tree);
 
   bit_unpacker *bu = bu_init(tree, inp);
   bu_unpack(bu, out);

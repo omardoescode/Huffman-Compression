@@ -9,7 +9,7 @@
 
 typedef struct priority_queue_t priority_queue_t;
 struct priority_queue_t {
-  huffman_node_t items[CHAR_MAX];
+  huffman_node_t *items;
   unsigned int size;
 };
 

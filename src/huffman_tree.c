@@ -4,6 +4,12 @@
 #include <assert.h>
 #include <stdint.h>
 
+struct huffman_node_t {
+  wchar_t element;
+  size_t weight;
+  huffman_node_t *left;
+  huffman_node_t *right;
+};
 huffman_node_t *hn_init(wchar_t el, size_t wt, huffman_node_t *l,
                         huffman_node_t *r) {
   huffman_node_t *hn = (huffman_node_t *)malloc(sizeof(huffman_node_t));
@@ -14,6 +20,19 @@ huffman_node_t *hn_init(wchar_t el, size_t wt, huffman_node_t *l,
 
   return hn;
 }
+
+huffman_node_t *hn_init_array(size_t size) {
+  return malloc(sizeof(huffman_node_t) * size);
+}
+
+huffman_node_t *hn_array_get(huffman_node_t *hn, size_t index) {
+  return hn + index;
+}
+
+wchar_t hn_element(huffman_node_t *hn) { return hn->element; }
+size_t hn_weight(huffman_node_t *hn) { return hn->weight; }
+huffman_node_t *hn_left(huffman_node_t *hn) { return hn->left; }
+huffman_node_t *hn_right(huffman_node_t *hn) { return hn->right; }
 
 void hn_copy(huffman_node_t *dest, const huffman_node_t *src) {
   dest->element = src->element;
