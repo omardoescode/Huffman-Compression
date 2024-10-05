@@ -13,5 +13,8 @@ main.o: main.c
 interpose.o: src/interpose.c include/interpose.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+docs: Doxyfile
+	doxygen Doxyfile
+
 clean:
 	rm -f *.o huff 
