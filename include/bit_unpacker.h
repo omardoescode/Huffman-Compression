@@ -28,8 +28,9 @@ bit_unpacker *bu_init(huffman_node_t *tree, FILE *fp);
  *
  * @param bu The bit unpacker
  * @param out The file to write to
+ * @param char_count The character count in the file
  */
-void bu_unpack(bit_unpacker *bu, FILE *out);
+void bu_unpack(bit_unpacker *bu, FILE *out, size_t char_count);
 
 /**
  * @brief free the bit unpacker

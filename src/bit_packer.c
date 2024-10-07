@@ -26,7 +26,7 @@ void bp_pack(bit_packer *bp, size_t val) {
   int length = get_bit_length(val) - 1;
   val &= (1UL << length) - 1;
   int bits_to_pack;
-  for (; length; length -= bits_to_pack) {
+  while (length > 0) {
     int available_bits = 8 - bp->bit_pos;
 
     bits_to_pack = (length < available_bits) ? length : available_bits;
@@ -37,6 +37,7 @@ void bp_pack(bit_packer *bp, size_t val) {
                   << (available_bits - bits_to_pack);
 
     bp->bit_pos += bits_to_pack;
+    length -= bits_to_pack;
 
     if (bp->bit_pos == 8) {
       fwrite(&bp->buffer, sizeof(bp->buffer), 1, bp->fp);
@@ -46,8 +47,7 @@ void bp_pack(bit_packer *bp, size_t val) {
 }
 
 void bp_flush(bit_packer *bp) {
-  if (bp->bit_pos) {
-    bp->buffer <<= (7 - bp->bit_pos);
+  if (bp->bit_pos > 0) {
     fwrite(&bp->buffer, sizeof(bp->buffer), 1, bp->fp);
   }
   bp->bit_pos = 0;

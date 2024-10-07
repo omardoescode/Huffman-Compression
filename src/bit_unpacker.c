@@ -35,8 +35,8 @@ char bu_get_bit(bit_unpacker *bu) {
   return bit;
 }
 
-void bu_unpack(bit_unpacker *bu, FILE *out) {
-  while (1) {
+void bu_unpack(bit_unpacker *bu, FILE *out, size_t char_count) {
+  for (size_t i = 0; i < char_count;) {
     char bit = bu_get_bit(bu);
     if (bit == -1)
       return;
@@ -49,6 +49,7 @@ void bu_unpack(bit_unpacker *bu, FILE *out) {
 
     if (hn_is_leaf(bu->temp)) {
       fprintf(out, "%lc", hn_element(bu->temp));
+      i++;
       bu->temp = bu->tree;
     }
   }

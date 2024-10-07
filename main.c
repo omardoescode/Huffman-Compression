@@ -34,11 +34,14 @@ FILE *open_file(char *filename, char *mode) {
   return fp;
 }
 
-void write_header(huffman_node_t *tree, FILE *fp) {
+void write_header(huffman_node_t *tree, FILE *fp, size_t char_count) {
   char *header = HEADER;
   char count = log2(sizeof(wchar_t));
+  char size = sizeof(size_t);
   fwrite(header, strlen(HEADER), 1, fp);
   fwrite(&count, sizeof(count), 1, fp);
+  fwrite(&size, 1, 1, fp);
+  fwrite(&char_count, size, 1, fp);
 
   tree_serializer *ts = ts_init(fp, tree, count);
   ts_serialize(ts);
@@ -49,6 +52,7 @@ void write_header(huffman_node_t *tree, FILE *fp) {
 void compress(FILE *inp, FILE *out) {
   vector *freq = v_init(0);
   vector *codes = v_init(0);
+  size_t count = 0;
 
   priority_queue_t *queue = pq_init();
   assert(queue);
@@ -57,6 +61,8 @@ void compress(FILE *inp, FILE *out) {
   while (WEOF != (c = getwc(inp))) {
     assert(c >= 0); // Ensure we are not missing around
     v_type *v;
+    assert(count + 1 > count);
+    count++;
     if ((v = v_get(freq, c))) {
       (*v)++;
     } else {
@@ -76,7 +82,7 @@ void compress(FILE *inp, FILE *out) {
   huffman_node_t *tree = hn_create_tree(queue);
   hn_assign_codes(tree, codes);
 
-  write_header(tree, out);
+  write_header(tree, out, count);
 
   rewind(inp);
   write_file(inp, out, codes);
@@ -89,11 +95,13 @@ void compress(FILE *inp, FILE *out) {
 
 void write_file(FILE *inp, FILE *out, vector *codes) {
   wchar_t c;
+  size_t count = 0;
 
   bit_packer *bp = bp_init(out);
 
   while (WEOF != (c = getwc(inp))) {
     wchar_t val = *v_get(codes, c);
+    count++;
     bp_pack(bp, val);
   }
 
@@ -103,9 +111,12 @@ void write_file(FILE *inp, FILE *out, vector *codes) {
 
 void uncompress(FILE *inp, FILE *out) {
   char *header = malloc(strlen(HEADER) + 1);
-  char count;
+  char count, size;
+  size_t char_count;
   fread(header, strlen(HEADER), 1, inp);
   fread(&count, sizeof(count), 1, inp);
+  fread(&size, 1, 1, inp);
+  fread(&char_count, size, 1, inp);
 
   header[strlen(HEADER)] = '\0';
   assert(strcmp(header, HEADER) == 0);
@@ -114,7 +125,7 @@ void uncompress(FILE *inp, FILE *out) {
   huffman_node_t *tree = ts_deserialize(ts);
 
   bit_unpacker *bu = bu_init(tree, inp);
-  bu_unpack(bu, out);
+  bu_unpack(bu, out, char_count);
 
   bu_free(bu);
   ts_free(ts);
@@ -135,10 +146,8 @@ int main(int argc, char *argv[argc]) {
   FILE *out = open_file(argv[3], "w, ccs=UTF-8");
   if (strcmp(argv[2], "-c") == 0) {
     compress(inp, out);
-    puts("Finishied Compression; Enjoy!!");
   } else if (strcmp(argv[2], "-u") == 0) {
     uncompress(inp, out);
-    puts("Finishied Uncompression; Enjoy!!");
   } else {
     fclose(inp);
     fclose(out);
