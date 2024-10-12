@@ -1,11 +1,8 @@
 CC=gcc
-CFLAGS=-Wall -fno-builtin  -lm
+CFLAGS=-Wall -fno-builtin  -lm -include interpose.h  -I./include 
 
-all: main.o priority_queue.o huffman_tree.o vector.o bit_packer.o bit_unpacker.o tree_serializer.o 
+all: main.o priority_queue.o huffman_tree.o vector.o bit_packer.o bit_unpacker.o tree_serializer.o interpose.o
 	$(CC) $(CFLAGS) $^ -o huff
-
-debug: main.o priority_queue.o huffman_tree.o vector.o bit_packer.o bit_unpacker.o tree_serializer.o interpose.o
-	$(CC) $(CFLAGS) -include interpose.h  -I./include $^ -o huff
 
 %.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

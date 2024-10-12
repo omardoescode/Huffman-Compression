@@ -1,3 +1,4 @@
+#if DEBUG
 #include "../include/interpose.h"
 #include "../include/debug.h"
 
@@ -24,13 +25,11 @@ size_t my_fread(void *__restrict __ptr, size_t __size, size_t __n,
 
   size_t res = original_fread(__ptr, __size, __n, __stream);
 
-#if DEBUG
   if (res != 0) {
     printf("-- fread(");
     binary(*((size_t *)__ptr), 0);
     printf(", %zu, %zu, <file>);\n", __size, __n);
   }
-#endif
 
   return res;
 }
@@ -45,14 +44,13 @@ size_t my_fwrite(const void *__restrict __ptr, size_t __size, size_t __n,
 
   int res = original_fwrite(__ptr, __size, __n, __s);
 
-#if DEBUG
   // Print if res is not zero
   if (res != 0) {
     printf("-- fwrite(");
     binary(*((size_t *)__ptr), 0);
     printf(", %zu, %zu, <file>);\n", __size, __n);
   }
-#endif
 
   return res;
 }
+#endif
